@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Cart - My Store</title>
+  <link rel="stylesheet" href="style.css">
+  <style>
+    body { font-family: Arial, sans-serif; margin: 0; padding: 0; background-color: #f4f4f4; }
+    header { background-color: #333; color: white; padding: 15px; text-align: center; }
+    nav a { margin: 0 15px; color: white; text-decoration: none; }
+    nav a:hover { text-decoration: underline; }
+    .cart-container { padding: 20px; }
+    .cart-item { display: flex; align-items: center; border-bottom: 1px solid #ccc; padding: 10px 0; }
+    .cart-item img { max-width: 100px; max-height: 100px; object-fit: cover; border-radius: 5px; margin-right: 20px; }
+    .cart-item div { flex-grow: 1; }
+    .cart-item button { padding: 5px 10px; background-color: #d9534f; color: white; border: none; cursor: pointer; border-radius: 5px; }
+    .cart-item button:hover { background-color: #c9302c; }
+    .total-price { font-size: 18px; margin-top: 20px; text-align: right; font-weight: bold; }
+    .buy-now-btn { display: block; width: 100%; padding: 15px; background-color: #5bc0de; color: white; text-align: center; font-size: 18px; border: none; border-radius: 5px; cursor: pointer; margin-top: 20px; }
+    .buy-now-btn:hover { background-color: #31b0d5; }
+  </style>
+</head>
+<body>
+  <header>
+    <h1>Your Cart</h1>
+    <nav>
+      <a href="index.html">Home</a>
+      <a href="products.html">Books</a>
+      <a href="cart.html">Cart (<span id="cart-count">0</span>)</a>
+    </nav>
+  </header>
+  <main class="cart-container">
+    <div id="cart-items"></div>
+    <div class="total-price">
+      Total: ₹<span id="total-price">0.00</span>
+    </div>
+    <button class="buy-now-btn" onclick="window.location.href='checkout.html'">Buy Now</button>
+  </main>
+
+  <script>
+    function displayCartItems() {
+      const cart = JSON.parse(localStorage.getItem('cart')) || [];
+      const cartItemsContainer = document.getElementById('cart-items');
+      const totalPriceElement = document.getElementById('total-price');
+      
+      cartItemsContainer.innerHTML = ''; // Clear previous items
+      let totalPrice = 0;
+  
+      cart.forEach((item, index) => {
+        const cartItem = document.createElement('div');
+        cartItem.style.display = "flex";
+        cartItem.style.alignItems = "center";
+        cartItem.style.justifyContent = "space-between";
+        cartItem.style.borderBottom = "1px solid #ccc";
+        cartItem.style.padding = "10px 0";
+  
+        // Product Image
+        const productImage = document.createElement('img');
+        productImage.src = item.image;
+        productImage.style.width = "80px";
+        productImage.style.height = "80px";
+        productImage.style.objectFit = "cover";
+        productImage.style.borderRadius = "5px";
+        productImage.style.marginRight = "15px";
+  
+        // Product Details
+        const productDetails = document.createElement('div');
+        productDetails.style.flexGrow = "1";
+  
+        const productName = document.createElement('h3');
+        productName.textContent = item.name;
+        productName.style.margin = "0";
+  
+        const productPrice = document.createElement('p');
+        productPrice.textContent = `₹${item.price.toFixed(2)}`;
+        productPrice.style.margin = "5px 0";
+        productPrice.style.color = "#333";
+  
+        productDetails.appendChild(productName);
+        productDetails.appendChild(productPrice);
+  
+        // Remove Button
+        const removeButton = document.createElement('button');
+        removeButton.textContent = "Remove";
+        removeButton.style.padding = "8px 12px";
+        removeButton.style.backgroundColor = "#d9534f";
+        removeButton.style.color = "white";
+        removeButton.style.border = "none";
+        removeButton.style.cursor = "pointer";
+        removeButton.style.borderRadius = "5px";
+        removeButton.style.marginLeft = "10px";
+        removeButton.onclick = function () { removeFromCart(index); };
+  
+        // Append elements to cart item
+        cartItem.appendChild(productImage);
+        cartItem.appendChild(productDetails);
+        cartItem.appendChild(removeButton);
+  
+        cartItemsContainer.appendChild(cartItem);
+        totalPrice += item.price;
+      });
+  
+      // Update total price
+      totalPriceElement.textContent = totalPrice.toFixed(2);
+      document.getElementById('cart-count').textContent = cart.length;
+    }
+  
+    displayCartItems();
+  </script>
+  
+</body>
+</html>

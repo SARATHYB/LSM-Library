@@ -1,0 +1,265 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Checkout - Beyond Books</title>
+  <link rel="stylesheet" href="style.css">
+  <style>
+    body { font-family: Arial, sans-serif; margin: 0; padding: 0; background-color: #f4f4f4; }
+    header { background-color: #333; color: white; padding: 15px; text-align: center; }
+    nav { text-align: center; margin-top: 10px; }
+    nav a { margin: 0 15px; color: white; text-decoration: none; font-size: 18px; }
+    nav a:hover { text-decoration: underline; }
+    .container { width: 80%; margin: 0 auto; padding: 20px; }
+    .checkout-section { display: flex; justify-content: space-between; margin-top: 20px; }
+    .checkout-left, .checkout-right { width: 48%; }
+    .checkout-left h2, .checkout-right h2 { color: #333; }
+    .checkout-left input, .checkout-right input { width: 100%; padding: 10px; margin: 10px 0; border: 1px solid #ccc; border-radius: 5px; }
+    .checkout-left input[type="text"], .checkout-left input[type="email"], .checkout-left input[type="tel"], .checkout-left select { font-size: 16px; }
+    .place-order-btn { width: 100%; padding: 15px; background-color: #5bc0de; color: white; font-size: 18px; border: none; border-radius: 5px; cursor: pointer; margin-top: 20px; }
+    .place-order-btn:hover { background-color: #31b0d5; }
+    .order-summary { background-color: white; padding: 15px; border-radius: 5px; box-shadow: 0 0 10px rgba(0, 0, 0, 0.1); }
+    .order-summary h3 { margin-bottom: 10px; }
+    .order-summary p { margin: 5px 0; }
+    .order-summary .total-price { font-size: 20px; font-weight: bold; color: #d9534f; }
+    .form-group { margin-bottom: 15px; }
+    .form-group label { font-weight: bold; }
+    .form-group span { color: red; margin-left: 5px; }
+    /* Map Style */
+    #map { height: 400px; width: 100%; margin-top: 40px; }
+  </style>
+</head>
+<body>
+  <header>
+    <h1>Checkout</h1>
+    <nav>
+      <a href="index.html">Home</a>
+      <a href="products.html">Books</a>
+      <a href="cart.html">Cart</a>
+      <a href="checkout.html">Checkout</a>
+    </nav>
+  </header>
+
+  <div class="container">
+    <div class="checkout-section">
+      <div class="checkout-left">
+        <h2>Shipping Address</h2>
+        <form id="shipping-form" onsubmit="return validateForm()">
+          <div class="form-group">
+            <label for="name">Full Name <span>*</span></label>
+            <input type="text" id="name" name="name" placeholder="Full Name" required>
+          </div>
+          <div class="form-group">
+            <label for="address">Street Address <span>*</span></label>
+            <input type="text" id="address" name="address" placeholder="Street Address" required>
+          </div>
+          <div class="form-group">
+            <label for="city">City <span>*</span></label>
+            <input type="text" id="city" name="city" placeholder="City" required>
+          </div>
+          <div class="form-group">
+            <label for="state">State <span>*</span></label>
+            <input type="text" id="state" name="state" placeholder="State" required>
+          </div>
+          <div class="form-group">
+            <label for="zipcode">Zip Code <span>*</span></label>
+            <input type="text" id="zipcode" name="zipcode" placeholder="Zip Code" required>
+          </div>
+          <div class="form-group">
+            <label for="email">Email Address <span>*</span></label>
+            <input type="email" id="email" name="email" placeholder="Email Address" required>
+          </div>
+          <div class="form-group">
+            <label for="phone">Phone Number <span>*</span></label>
+            <input type="tel" id="phone" name="phone" placeholder="Phone Number" required>
+          </div>
+        </form>
+      </div>
+      
+      <div class="checkout-right">
+        <h2>Order Summary</h2>
+        <div class="order-summary">
+          <h3>Items in your cart</h3>
+          <div id="order-items">
+            <!-- Dynamic items will be displayed here -->
+          </div>
+          <p class="total-price">Total: ₹<span id="total-price">0.00</span></p>
+        </div>
+      </div>
+    </div>
+
+    <button class="place-order-btn" onclick="placeOrder()">Place Order</button>
+    
+    <!-- Google Map -->
+    <div id="map"></div>
+    
+  </div>
+
+  <script>
+  function displayOrderSummary() {
+    const cart = JSON.parse(localStorage.getItem('cart')) || [];
+    const orderItemsContainer = document.getElementById('order-items');
+    const totalPriceElement = document.getElementById('total-price');
+
+    // Clear the container
+    orderItemsContainer.innerHTML = '';
+
+    let totalPrice = 0;
+
+    cart.forEach((item) => {
+      const orderItem = document.createElement('p');
+      orderItem.textContent = `${item.name} - ₹${item.price}`;
+      orderItemsContainer.appendChild(orderItem);
+      totalPrice += item.price;
+    });
+
+    // Update the total price
+    totalPriceElement.textContent = totalPrice.toFixed(2);
+  }
+
+  // Call the function on page load
+  displayOrderSummary();
+</script>
+
+<script>
+  function displayOrderSummary() {
+    const cart = JSON.parse(localStorage.getItem('cart')) || [];
+    const orderItemsContainer = document.getElementById('order-items');
+    const totalPriceElement = document.getElementById('total-price');
+
+    // Clear the container before adding items
+    orderItemsContainer.innerHTML = '';
+
+    let totalPrice = 0;
+
+    cart.forEach((item) => {
+      // Create order item div
+      const orderItem = document.createElement('div');
+      orderItem.style.display = "flex";
+      orderItem.style.justifyContent = "space-between";
+      orderItem.style.padding = "10px 0";
+      orderItem.style.borderBottom = "1px solid #ddd";
+      orderItem.style.fontSize = "16px";
+
+      // Create name element
+      const itemName = document.createElement('p');
+      itemName.textContent = item.name;
+      itemName.style.margin = "0";
+
+      // Create price element
+      const itemPrice = document.createElement('p');
+      itemPrice.textContent = `₹${item.price.toFixed(2)}`;
+      itemPrice.style.margin = "0";
+      itemPrice.style.fontWeight = "bold";
+
+      // Append elements to order item
+      orderItem.appendChild(itemName);
+      orderItem.appendChild(itemPrice);
+
+      // Append order item to the order summary container
+      orderItemsContainer.appendChild(orderItem);
+
+      // Update total price
+      totalPrice += item.price;
+    });
+
+    // Style the total price
+    totalPriceElement.textContent = totalPrice.toFixed(2);
+    totalPriceElement.style.fontSize = "22px";
+    totalPriceElement.style.fontWeight = "bold";
+    totalPriceElement.style.color = "#d9534f";
+    totalPriceElement.style.textAlign = "right";
+    totalPriceElement.style.marginTop = "15px";
+  }
+
+  // Call the function when the page loads
+  displayOrderSummary();
+</script>
+
+
+  <script>
+    // Initialize Google Map
+    let map;
+    let marker;
+    let geocoder;
+
+    function initMap() {
+      geocoder = new google.maps.Geocoder();
+
+      // Set initial map options
+      map = new google.maps.Map(document.getElementById('map'), {
+        center: { lat: 28.6139, lng: 77.2090 },  // Default to New Delhi
+        zoom: 12
+      });
+
+      // Create a marker
+      marker = new google.maps.Marker({
+        map: map,
+        draggable: true,
+      });
+    }
+
+    // Listen for changes in the address field
+    document.getElementById('address').addEventListener('change', function() {
+      const address = document.getElementById('address').value;
+      geocodeAddress(address);
+    });
+
+    // Geocode the address entered by the user
+    function geocodeAddress(address) {
+      if (address) {
+        geocoder.geocode({ 'address': address }, function(results, status) {
+          if (status === 'OK') {
+            // Place marker on the map at the geocoded location
+            const location = results[0].geometry.location;
+            map.setCenter(location); // Center the map at this location
+            marker.setPosition(location); // Move the marker to the new location
+
+            // Optionally, you can fill in other address fields based on geocoding results
+            fillAdditionalFields(results[0].address_components);
+          } else {
+            alert('Geocode was not successful for the following reason: ' + status);
+          }
+        });
+      } else {
+        alert("Please enter an address.");
+      }
+    }
+
+    // Fill additional address fields based on the geocoded results
+    function fillAdditionalFields(addressComponents) {
+      addressComponents.forEach(component => {
+        if (component.types.includes('locality')) {
+          document.getElementById('city').value = component.long_name;
+        }
+        if (component.types.includes('administrative_area_level_1')) {
+          document.getElementById('state').value = component.long_name;
+        }
+        if (component.types.includes('postal_code')) {
+          document.getElementById('zipcode').value = component.long_name;
+        }
+      });
+    }
+
+    // Function to handle placing the order (same as before)
+    function placeOrder() {
+      const isValid = validateForm();
+      if (!isValid) return;  // Don't proceed if form is invalid
+
+      alert('Proceeding to Payment');
+      window.location.href = 'payment.html'; // Redirect to the payment page
+    }
+
+    {% comment %} // Google Maps API Script
+    function loadMap() {
+      const script = document.createElement('script');
+      script.src = 'https://maps.googleapis.com/maps/api/js?key=AIzaSyDqzFgzqMc4uS2wO3bu6JTkOhbZCZc4Oio&callback=initMap&libraries=places';
+      script.async = true;
+      document.head.appendChild(script);
+    } {% endcomment %}
+
+    loadMap();
+  </script>
+</body>
+</html>

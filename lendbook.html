@@ -1,0 +1,159 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Lend Book - Beyond Books</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background-color: #f4f4f4;
+      padding: 40px;
+      text-align: center;
+    }
+    .container {
+      background-color: #fff;
+      padding: 30px;
+      max-width: 500px;
+      margin: 0 auto;
+      border-radius: 10px;
+      box-shadow: 0px 0px 10px rgba(0,0,0,0.1);
+    }
+    h2 {
+      margin-bottom: 20px;
+    }
+    .btn {
+      padding: 10px 20px;
+      background-color: #333;
+      color: white;
+      border: none;
+      cursor: pointer;
+      margin-top: 20px;
+      border-radius: 5px;
+    }
+    .btn:hover {
+      background-color: #555;
+    }
+    .out-of-stock {
+      color: red;
+      font-weight: bold;
+      margin-top: 20px;
+    }
+    .success {
+      color: green;
+      font-weight: bold;
+      margin-top: 20px;
+    }
+    form {
+      margin-top: 20px;
+      display: none;
+    }
+    input[type="text"], input[type="tel"] {
+      padding: 10px;
+      width: 90%;
+      margin: 10px 0;
+      border: 1px solid #ccc;
+      border-radius: 5px;
+    }
+  </style>
+</head>
+<body>
+
+  <div class="container">
+    <h2 id="book-title">Lending Book...</h2>
+    <div id="status-message"></div>
+
+    <!-- Confirm Button -->
+    <button class="btn" id="lend-button" style="display:none;">Confirm Lend</button>
+
+    <!-- User Info Form -->
+    <form id="user-form">
+      <input type="text" id="user-name" placeholder="Your Name" required pattern="[A-Za-z ]+"><br>
+      <input type="tel" id="user-phone" placeholder="Phone Number" required pattern="[0-9]{10}" maxlength="10"><br>
+      <button type="submit" class="btn">Submit</button>
+    </form>
+  </div>
+
+  <script>
+    const book = localStorage.getItem('selectedBookToLend');
+    const stockKey = `stock-${book}`;
+    const titleElement = document.getElementById('book-title');
+    const message = document.getElementById('status-message');
+    const lendButton = document.getElementById('lend-button');
+    const userForm = document.getElementById('user-form');
+
+    titleElement.textContent = `Lend "${book}"`;
+
+    // Define default stock values per book
+    const defaultStocks = {
+      "The Psychology of Money": 2,
+      "Ikigai": 4,
+      "Dopamine Detox": 3,
+      "Deep Work": 5,
+      "I Came Upon a Lighthouse": 2,
+      "The Power of Your Subconscious Mind": 6,
+      "How to Win Friends and Influence People": 1,
+      "The 5 AM Club – Own Your Morning": 3,
+      "The Mountain Is You": 4,
+      "Atomic Habits: Tiny Changes Remarkable Results": 3
+    };
+
+    // Set stock only if it doesn't exist
+    if (localStorage.getItem(stockKey) === null) {
+      const defaultStock = defaultStocks[book] || 3;
+      localStorage.setItem(stockKey, defaultStock.toString());
+    }
+
+    let stock = parseInt(localStorage.getItem(stockKey));
+
+    if (stock > 0) {
+      message.innerHTML = `Stock available: <strong>${stock}</strong>`;
+      lendButton.style.display = 'inline-block';
+    } else {
+      message.innerHTML = `<p class="out-of-stock">Out of Stock</p>`;
+    }
+
+    lendButton.addEventListener('click', () => {
+      lendButton.style.display = 'none';
+      userForm.style.display = 'block';
+    });
+
+    userForm.addEventListener('submit', function(e) {
+      e.preventDefault();
+
+      const name = document.getElementById('user-name').value.trim();
+      const phone = document.getElementById('user-phone').value.trim();
+
+      const namePattern = /^[A-Za-z ]+$/;
+      const phonePattern = /^\d{10}$/;
+
+      if (!namePattern.test(name)) {
+        alert("Please enter a valid name using only alphabets.");
+        return;
+      }
+
+      if (!phonePattern.test(phone)) {
+        alert("Please enter a valid 10-digit phone number.");
+        return;
+      }
+
+      stock -= 1;
+      localStorage.setItem(stockKey, stock.toString());
+
+      userForm.style.display = 'none';
+      message.innerHTML = `
+        <p class="success">
+          ✅ Book successfully lent to <strong>${name}</strong> (📞 ${phone}).<br>
+          Remaining stock: ${stock}<br><br>
+          📍 Please collect your book from:<br><br>
+          <strong>No.99 Vellore BookHouse,</strong><br>
+          Old bus stand,<br>
+          Vellore - 632007<br><br>
+          📚 Happy Reading!
+        </p>
+      `;
+    });
+  </script>
+
+</body>
+</html>
